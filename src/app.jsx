@@ -1,47 +1,104 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
-import { InView } from 'react-intersection-observer';
 import axios from 'axios';
 
 import { SearchComponent } from './components/search-component';
 import { LoadingComponent } from './components/loading-component';
+import { InViewComponent } from './components/in-view-component';
 
 import './styles/main.scss';
 
+const initialState = {
+  query: '',
+  results: [],
+  page: 1,
+  isLoading: false,
+  error: null
+};
+
+function reducer(state, action) {
+  const newState = action.payload;
+
+  switch (action.type) {
+    case 'resetSearch':
+      return { 
+        ...initialState,
+        query: newState.query,
+        results: [],
+        page: 1
+      };
+    case 'nextPage':
+      return { 
+        ...state,  
+        page: newState.page + 1
+      };
+    case 'loading': 
+      return {
+        ...state, 
+        isLoading: true,
+        error: false
+      }
+    case 'loaded': 
+      return {
+        ...state, 
+        isLoading: false,
+        results: newState.results
+      }
+    case 'error': 
+      return {
+        ...initialState, 
+        isLoading: false,
+        results: [],
+        error: newState.error
+      }
+    default:
+      return initialState;
+  }
+}
+
 export function App() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { query, results, page, isLoading, error } = state;
+
   const apiRoot = 'https://api.github.com/search/repositories';
 
-  const triggerApi = (value) =>  {
-    console.log('value:', value);
-    setIsLoading(true);
-    axios.get(`https://api.github.com/search/repositories?q=${value}&page=${page}&per_page=100`).then((response) => {
-      console.log('response:', response);
-      console.log('response.headers:', response.headers.link);
-      setResults([ ...results, ...response.data.items ]);
-      setPage(page + 1);
-      setIsLoading(false);
+  const triggerApi = () =>  {
+    if(!query) { return; }
+
+    let cancel;
+    console.log('query:', query);
+    dispatch({ type: 'loading' });
+
+    axios({
+      method: 'GET',
+      url: apiRoot,
+      params: { q: query, page: page, per_page: 100 },
+      cancelToken: new axios.CancelToken(c => cancel = c)
+    }).then(response => {
+      // console.log('response:', response);
+      // console.log('response.headers:', response.headers.link);
+      dispatch({ type: 'loaded', payload: { results: [ ...results, ...response.data.items ] } });
+    }).catch(e => {
+      if (axios.isCancel(e)) return
+      // setError(true)
+      dispatch({ type: 'error', payload: { error: e } });
     });
   };
 
-  const getNewPage = (inView, entry) => {
-    console.log('====== getNewPage:', inView);
-    inView && triggerApi(query);
-  }
+  const handleChange = () => 
+    dispatch({ type: 'nextPage', payload: { page } });
+  
 
   const renderResults = () => {
     console.log('here');
     return results.map((result, index) => {
-      console.log('result:', result);
+      // console.log('result:', result);
       const isLast = index + 1 === results.length;
       return isLast ? 
-      <InView key={result.id} as="div" triggerOnce={true} onChange={(inView) => getNewPage(inView)}>
+        <InViewComponent key={result.id} onChange={handleChange}>
+          <div key={result.id}>{result.full_name}</div>
+        </InViewComponent> :
         <div key={result.id}>{result.full_name}</div>
-      </InView> : 
-      <div key={result.id}>{result.full_name}</div>
     }
     );
   };
@@ -56,15 +113,7 @@ export function App() {
         return;
       }
 
-      setQuery(value);
-      setPage(1);
-
-      // axios.get(`https://api.github.com/search/repositories?q=${value}&page=10&per_page=100`).then((response) => {
-      //   console.log('response:', response);
-      //   console.log('response.headers:', response.headers.link);
-      //   setResults(response.data.items);
-      // });
-      triggerApi(value);
+      dispatch({ type: 'resetSearch', payload: { query: value } });
 
       //TODO: incomplete_results
 
@@ -74,11 +123,13 @@ export function App() {
     600
   );
 
+  useEffect(() => triggerApi(), [page, query]);
+
   return (
     <div className="wrapper">
       <SearchComponent handleChange={debouncedCallback} />
       <div className="results">
-        {results && renderResults()}
+        {state.results && renderResults()}
       </div>
       <LoadingComponent isLoading={isLoading} />
     </div>
