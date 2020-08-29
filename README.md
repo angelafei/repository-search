@@ -1,5 +1,5 @@
 # repository-search
-Perform Infinite-scroll by Using the Javascript [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
+Perform Infinite-scroll by using the Javascript [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
 
 ## Installation
 
@@ -27,6 +27,7 @@ User Input -> debounce -> trigger Github repository search -> display results / 
 
 - debounce: to prevent from triggering api too often
 - Infinite scroll: use Intersection Observer api to detect when to load new page
+- Axios cancel token: if trigger new search before previous search completed, previous one will be cancelled
 - error handling: 
   - console error: 422 (Only the first 1000 search results are available)
   - console error: 403 (API rate limit exceeded)
