@@ -8,6 +8,7 @@ $ git clone https://github.com/angelafei/repository-search.git
 $ cd repository-search
 $ npm install && npm start (Serve and demonstrate with webpack-dev-server)
 ```
+Open browser and visit http://localhost:8080/ to see the demonstration
 
 ## Build for production
 ```shell
@@ -16,13 +17,20 @@ $ npm run build
 And move dist/ folder to your hosting place
 
 ## Unit testing
-Implemented with `Mocha`, `Chai`, `Sinon` and `@testing-library/react`
+Implemented with `Mocha`, `Chai`, `Sinon` and `@testing-library/react`; Generated test coverage report with `nyc` 
 ```shell
 $ npm run test
 ```  
 
-## Flow
+## Flow / Features
 User Input -> debounce -> trigger Github repository search -> display results / errors
+
+- debounce: to prevent from triggering api too often
+- Infinite scroll: use Intersection Observer api to detect when to load new page
+- error handling: 
+  - console error: 422 (Only the first 1000 search results are available)
+  - console error: 403 (API rate limit exceeded)
+  - display error: other api error
 
 
 ## Source Code File Structure

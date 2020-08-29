@@ -6,7 +6,7 @@ import { initialState, reducer } from './reducer';
 
 import { SearchComponent } from './components/search-component';
 import { LoadingComponent } from './components/loading-component';
-import { InViewComponent } from './components/in-view-component';
+import { ResultsComponent } from './components/results-component';
 
 import './styles/main.scss';
 
@@ -57,27 +57,6 @@ export function App() {
   const handleChange = () => 
     dispatch({ type: 'nextPage', payload: { page } });
 
-  const renderList = result =>  (
-    <div className="list" key={result.id}>
-      <a href={result.html_url} rel="noreferrer nofollow" target="_blank">{result.full_name}</a>
-    </div>
-  );
-  
-  const renderResults = () => {
-    if (query && !isLoading && results.length === 0) {
-      return <div className="list empty-result">No result!</div>
-    }
-    return results.map((result, index) => {
-      const isLast = index + 1 === results.length;
-  
-      return isLast ? 
-        <InViewComponent key={result.id} onChange={handleChange} threshold={0.3}>
-          {renderList(result)}
-        </InViewComponent> :
-        renderList(result)
-    });
-  }
-
   // Debounce callback
   const [debouncedCallback] = useDebouncedCallback(
     (value) => {
@@ -95,9 +74,12 @@ export function App() {
     <div className="scrolling-box">
       <div className="wrapper">
         <SearchComponent handleChange={debouncedCallback} />
-        <div className="results">
-          {results && renderResults()}
-        </div>
+        {results && <ResultsComponent 
+          query={query} 
+          isLoading={isLoading}  
+          results={results}
+          handleChange={handleChange}
+        />}
         <LoadingComponent isLoading={isLoading} />
         {error && <div className="error">{error.message}</div>}
       </div>
