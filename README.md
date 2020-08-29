@@ -6,8 +6,14 @@ Perform Infinite-scroll by Using the Javascript [Intersection Observer API](http
 ```shell
 $ git clone https://github.com/angelafei/repository-search.git
 $ cd repository-search
-$ npm install && npm start
-```  
+$ npm install && npm start (Serve and demonstrate with webpack-dev-server)
+```
+
+## Build for production
+```shell
+$ npm run build
+```
+And move dist/ folder to your hosting place
 
 ## Unit testing
 Implemented with `Mocha`, `Chai`, `Sinon` and `@testing-library/react`
