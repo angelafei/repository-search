@@ -15,7 +15,7 @@ describe('Search Component', function () {
 
   it('triggers handle search function on input change', async function() {
     const handleSearchSpy = sinon.spy();
-    const { container } = render(<SearchComponent handleChange={handleSearchSpy} className={'test'} />);
+    const { container } = render(<SearchComponent handleChange={handleSearchSpy} />);
 
     const node = container.querySelector('.search-container  input');
     node.value = 'a';
