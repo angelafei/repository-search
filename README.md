@@ -1,4 +1,5 @@
 # repository-search
+Perform Infinite-scroll by Using the Javascript [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver).
 
 ## Installation
 
@@ -13,6 +14,9 @@ Implemented with `Mocha`, `Chai`, `Sinon` and `@testing-library/react`
 ```shell
 $ npm run test
 ```  
+
+## Flow
+User Input -> debounce -> trigger Github repository search -> display results / errors
 
 
 ## Source Code File Structure
