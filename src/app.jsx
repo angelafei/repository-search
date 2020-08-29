@@ -2,136 +2,108 @@ import React, { useEffect, useReducer } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import axios from 'axios';
 
+import { initialState, reducer } from './reducer';
+
 import { SearchComponent } from './components/search-component';
 import { LoadingComponent } from './components/loading-component';
 import { InViewComponent } from './components/in-view-component';
 
 import './styles/main.scss';
 
-const initialState = {
-  query: '',
-  results: [],
-  page: 1,
-  isLoading: false,
-  error: null
-};
-
-function reducer(state, action) {
-  const newState = action.payload;
-
-  switch (action.type) {
-    case 'resetSearch':
-      return { 
-        ...initialState,
-        query: newState.query,
-        results: [],
-        page: 1
-      };
-    case 'nextPage':
-      return { 
-        ...state,  
-        page: newState.page + 1
-      };
-    case 'loading': 
-      return {
-        ...state, 
-        isLoading: true,
-        error: false
-      }
-    case 'loaded': 
-      return {
-        ...state, 
-        isLoading: false,
-        results: newState.results
-      }
-    case 'error': 
-      return {
-        ...initialState, 
-        isLoading: false,
-        results: [],
-        error: newState.error
-      }
-    default:
-      return initialState;
-  }
-}
-
 export function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { query, results, page, isLoading, error } = state;
+  const { query, hasMore, results, page, isLoading, error } = state;
+  const itemsPerPage = 100;
 
   const apiRoot = 'https://api.github.com/search/repositories';
 
-  const triggerApi = () =>  {
-    if(!query) { return; }
-
+  const triggerApi = () => {
     let cancel;
-    console.log('query:', query);
-    dispatch({ type: 'loading' });
 
-    axios({
-      method: 'GET',
-      url: apiRoot,
-      params: { q: query, page: page, per_page: 100 },
+    if (!query || !hasMore) { 
+      return; 
+    }
+
+    dispatch({ type: 'loading' });
+  
+    axios.get(`${apiRoot}?q=${query}&page=${page}&per_page=${itemsPerPage}`, {
       cancelToken: new axios.CancelToken(c => cancel = c)
     }).then(response => {
-      // console.log('response:', response);
-      // console.log('response.headers:', response.headers.link);
-      dispatch({ type: 'loaded', payload: { results: [ ...results, ...response.data.items ] } });
+      const newResults = [ 
+        ...results, 
+        ...response.data.items 
+      ];
+
+      dispatch({ 
+        type: 'loaded', 
+        payload: {
+          hasMore: newResults.length < response.data.total_count,
+          results: newResults
+        }
+      });
     }).catch(e => {
       if (axios.isCancel(e)) return
-      // setError(true)
-      dispatch({ type: 'error', payload: { error: e } });
+
+      if (e && e.response && (e.response.status === 422 || e.response.status === 403)) {
+        console.error(e.response.data.message);
+        dispatch({ type: 'warning' });
+      } else {
+        dispatch({ type: 'error', payload: { error: e } });
+      }
     });
+    return () => cancel()
   };
 
   const handleChange = () => 
     dispatch({ type: 'nextPage', payload: { page } });
-  
 
+  const renderList = result =>  (
+    <div className="list" key={result.id}>
+      <a href={result.html_url} rel="noreferrer nofollow" target="_blank">{result.full_name}</a>
+    </div>
+  );
+  
   const renderResults = () => {
-    console.log('here');
-    return results.map((result, index) => {
-      // console.log('result:', result);
-      const isLast = index + 1 === results.length;
-      return isLast ? 
-        <InViewComponent key={result.id} onChange={handleChange}>
-          <div key={result.id}>{result.full_name}</div>
-        </InViewComponent> :
-        <div key={result.id}>{result.full_name}</div>
+    if (query && !isLoading && results.length === 0) {
+      return <div className="list empty-result">No result!</div>
     }
-    );
-  };
+    return results.map((result, index) => {
+      const isLast = index + 1 === results.length;
+  
+      return isLast ? 
+        <InViewComponent key={result.id} onChange={handleChange} threshold={0.3}>
+          {renderList(result)}
+        </InViewComponent> :
+        renderList(result)
+    });
+  }
 
   // Debounce callback
   const [debouncedCallback] = useDebouncedCallback(
-    // function
     (value) => {
-      console.log('value:', value);
-
       if (!value) {
         return;
       }
-
       dispatch({ type: 'resetSearch', payload: { query: value } });
-
-      //TODO: incomplete_results
-
-
     },
-    // delay in ms
     600
   );
 
   useEffect(() => triggerApi(), [page, query]);
 
   return (
-    <div className="wrapper">
-      <SearchComponent handleChange={debouncedCallback} />
-      <div className="results">
-        {state.results && renderResults()}
+    <div className="scrolling-box">
+      <div className="wrapper">
+        <SearchComponent handleChange={debouncedCallback} />
+        <div className="results">
+          {results && renderResults()}
+        </div>
+        <LoadingComponent isLoading={isLoading} />
+        {error && <div className="error">{error.message}</div>}
       </div>
-      <LoadingComponent isLoading={isLoading} />
+      <div className="back-to-top-wrapper">
+        <a href="#" className="back-to-top-link" aria-label="Scroll to Top">🔝</a>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import React from 'react';
 
 export function SearchComponent(props) {
@@ -6,11 +6,12 @@ export function SearchComponent(props) {
 
   return (
     <div className="search-container">
-      <input type="text" onChange={(e) => handleChange(e.target.value)} />
+      <input className="search-input" type="text" onChange={(e) => handleChange(e.target.value)} />
     </div>
   );
 }
 
-// InfoComponent.propTypes = {
-//   info: PropTypes.object.isRequired,
-// };
+SearchComponent.propTypes = {
+  className: PropTypes.string,
+  handleChange: PropTypes.func.isRequired
+};

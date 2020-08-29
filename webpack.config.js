@@ -1,12 +1,14 @@
 const path = require('path');
+// eslint-disable-next-line no-unused-vars
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: { main:'./src/main.jsx',
-  styles: './src/styles/main.scss'
- },
+  entry: { 
+    main:'./src/main.jsx',
+    styles: './src/styles/main.scss'
+  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
@@ -19,7 +21,7 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: "babel-loader",
+            loader: 'babel-loader',
             options: {
               presets: ['@babel/preset-react']
             }
@@ -29,7 +31,7 @@ module.exports = {
       {
         test: /\.(scss)$/,
         exclude: /node_modules/,
-        use: ["style-loader", "css-loader", "sass-loader"]
+        use: ['style-loader', 'css-loader', 'sass-loader']
       },
       {
         test: /\.(woff|ttf|otf|eot|woff2|svg)$/i,

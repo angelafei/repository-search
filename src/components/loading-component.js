@@ -1,4 +1,4 @@
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import React from 'react';
 import '../styles/loading.scss';
 
@@ -7,10 +7,10 @@ export function LoadingComponent(props) {
   const { isLoading } = props
 
   return (
-    <div className={isLoading ? 'lds-dual-ring' : 'hidden'}></div>
+    <div className={isLoading ? 'loading lds-dual-ring' : 'loading hidden'}></div>
   );
 }
 
-// InfoComponent.propTypes = {
-//   info: PropTypes.object.isRequired,
-// };
+LoadingComponent.propTypes = {
+  isLoading: PropTypes.bool
+};

@@ -3,9 +3,11 @@
 }
 
 .lds-dual-ring {
-  display: inline-block;
+  display: block;
   width: 80px;
   height: 80px;
+  margin: 0 auto;
+  padding: 1rem 0;
 }
 .lds-dual-ring:after {
   content: " ";
