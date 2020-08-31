@@ -34,7 +34,7 @@ User Input -> debounce -> trigger Github repository search -> display results / 
   - display error: other api error
 
 
-## Source Code File Structure
+## Files Structure
 ```
 ├── README.md
 ├── package-lock.json
@@ -44,6 +44,7 @@ User Input -> debounce -> trigger Github repository search -> display results / 
 │   ├── components
 │   │   ├── in-view-component.js
 │   │   ├── loading-component.js
+│   │   ├── results-component.js
 │   │   └── search-component.js
 │   ├── fonts
 │   │   └── Roboto-Light.ttf
@@ -61,6 +62,7 @@ User Input -> debounce -> trigger Github repository search -> display results / 
 │       ├── components
 │       │   ├── in-view-component.spec.js
 │       │   ├── loading-component.spec.js
+│       │   ├── results-component.spec.js
 │       │   └── search-component.spec.js
 │       └── reducer
 │           └── index.spec.js
@@ -69,3 +71,4 @@ User Input -> debounce -> trigger Github repository search -> display results / 
 
 ## Future improvement
   - [ ] UI/UX
+  - [ ] More error handling
