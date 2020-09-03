@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useCallback } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import axios from 'axios';
 
@@ -17,7 +17,7 @@ export function App() {
 
   const apiRoot = 'https://api.github.com/search/repositories';
 
-  const triggerApi = () => {
+  const triggerApi = useCallback(() => {
     let cancel;
 
     if (!query || !hasMore) { 
@@ -52,7 +52,7 @@ export function App() {
       }
     });
     return () => cancel()
-  };
+  }, [page, query, hasMore, results]);
 
   const handleChange = () => 
     dispatch({ type: 'nextPage', payload: { page } });
@@ -68,7 +68,7 @@ export function App() {
     600
   );
 
-  useEffect(() => triggerApi(), [page, query]);
+  useEffect(() => triggerApi(), [triggerApi]);
 
   return (
     <div className="scrolling-box">
